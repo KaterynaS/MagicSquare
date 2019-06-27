@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.plattysoft.leonids.ParticleSystem;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -23,7 +25,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private int size = 4; //size of a board
     private int numberOfMoves;
     private int indexOfEmpty;
-    boolean isFinished;
     int[] arrayOfSixteen;
 
     private ArrayList<TextView> cells;
@@ -78,12 +79,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             if(isSolved())
             {
+                showAnimation();
                 showVictoryDialog();
             }
-
-
-
         }
+    }
+
+    public void showAnimation()
+    {
+        ParticleSystem ps =
+                new ParticleSystem(this, 1000, R.drawable.ic_flower, 500);
+        ps.setSpeedRange(0.2f, 0.5f);
+        ps.emit(movesTextView, 100);
+                //.oneShot(anchorView, numParticles);
     }
 
     public int[] getCoordinates(int numberInOneDArray)
@@ -221,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                (new ContextThemeWrapper(this, R.style.AlertDialogCustom));
 
         AlertDialog.Builder alertDialogBuilder =
-                new AlertDialog.Builder(this, R.style.AlertDialogCustom);
+                new AlertDialog.Builder(this);
 
         alertDialogBuilder.setMessage(message);
         alertDialogBuilder.setCancelable(false);
@@ -241,9 +249,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 });
 
-
         AlertDialog alert = alertDialogBuilder.create();
-//        alert.setTitle("Victory tittle!");
+        alert.setTitle("Victory!");
         alert.show();
     }
 
