@@ -7,4 +7,5 @@
 
     <color name="buttonBackgroundColor">#3949AB</color>
     <color name="buttonTextColor">#ffffff</color>
+    <color name="appBackground">#D6D6D6</color>
 </resources>

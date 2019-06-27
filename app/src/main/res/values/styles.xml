@@ -28,4 +28,9 @@
         <item name="android:gravity">center</item>
     </style>
 
+    <style name="AlertDialogCustom" parent="@android:style/Theme.Dialog">
+        <item name="android:textColor">@color/buttonBackgroundColor</item>
+        <item name="android:textSize">26sp</item>
+    </style>
+
 </resources>

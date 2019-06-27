@@ -1,14 +1,15 @@
 package com.example.fifteen;
 
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -21,12 +22,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //board
     private int size = 4; //size of a board
     private int numberOfMoves;
-    private int[] arr; //row column
     private int indexOfEmpty;
     boolean isFinished;
     int[] arrayOfSixteen;
 
-    private List<Button> cells;
+    private ArrayList<TextView> cells;
     private static final int[] CELL_IDS = {
             R.id.cell1600, R.id.cell1601, R.id.cell1602, R.id.cell1603,
             R.id.cell1610, R.id.cell1611, R.id.cell1612, R.id.cell1613,
@@ -44,23 +44,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         newGameButton = findViewById(R.id.bnew_game);
         newGameButton.setOnClickListener(this);
 
-        cells = new ArrayList<Button>();
-        // or slightly better
-        // cells = new ArrayList<Button>(BUTTON_IDS.length);
+        cells = new ArrayList<TextView>();
+
         for(int id : CELL_IDS) {
-            Button cell = (Button)findViewById(id);
+            TextView cell = (TextView) findViewById(id);
             cell.setOnClickListener(this); // maybe
             cells.add(cell);
         }
-
         shuffle();
     }
 
+
     public void moveTile(int indexOfPressedCell)
     {
-        //i is an number of a cell pressed in an array of cells int[] CELL_IDS
-
-
     //check if the adjacent tile is empty
         //get coordinates of a pressed tile
         int[] cellPressed = getCoordinates(indexOfPressedCell);
@@ -79,8 +75,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             numberOfMoves++;
             movesTextView.setText("Moves: " + numberOfMoves);
             renewGrid();
-        }
 
+            if(isSolved())
+            {
+                showVictoryDialog();
+            }
+
+
+
+        }
     }
 
     public int[] getCoordinates(int numberInOneDArray)
@@ -106,37 +109,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //in a new arrayOfSixteen add 0 to the and
         arrayOfSixteen = new int[16];
-        for (int i = 0; i < arrayOfSixteen.length; i++)
+        arrayOfSixteen[15] = 0;
+        for (int i = 0; i < arrayOfFifteen.length; i++)
         {
-            if(i == arrayOfSixteen.length - 1)
-            {
-                arrayOfSixteen[i] = 0;
-            }
-            else
-            {
                 arrayOfSixteen[i] = arrayOfFifteen[i];
-            }
         }
-
         renewGrid();
     }
 
 
     private void renewGrid()
     {
-        for (int i = 0; i < arrayOfSixteen.length; i++) {
-
+        for (int i = 0; i < arrayOfSixteen.length; i++)
+        {
+            TextView cell = cells.get(i);
             if(arrayOfSixteen[i] == 0)
             {
-                Button cell = cells.get(i);
                 cell.setText("");
                 cells.get(i).setBackgroundColor(getResources().getColor(R.color.buttonTextColor));
             }
             else
             {
-                Button cell = cells.get(i);
-                String tileName = "" + arrayOfSixteen[i];
-                cell.setText(tileName);
+                //String tileName = "" + arrayOfSixteen[i];
+                cell.setText("" + arrayOfSixteen[i]);
                 cells.get(i).setBackgroundColor(getResources().getColor(R.color.buttonBackgroundColor));
             }
         }
@@ -193,21 +188,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
 
-
-        if(!isFinished)
+        for(int i = 0; i < CELL_IDS.length; i++)
         {
-            for(int i = 0; i < CELL_IDS.length; i++)
+            if(v.getId() == CELL_IDS[i])
             {
-                if(v.getId() == CELL_IDS[i])
-                {
-                    moveTile(i);
-                    if(isSolved())
-                    {
-                        Toast.makeText(MainActivity.this,
-                                "VICTORY",
-                                Toast.LENGTH_LONG).show();
-                    }
-                }
+                moveTile(i);
             }
         }
 
@@ -219,28 +204,67 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 //movesTextView= findViewById(R.id.moves);
                 movesTextView.setText("Moves: " + numberOfMoves);
                 break;
-            case R.id.cell1633:
-                //todo
-                break;
             default:
                 break;
         }
     }
 
 
+    public void showVictoryDialog()
+    {
+        String message = "You solved it with " + numberOfMoves + " moves.\n" +
+                "Play new game or quit?";
+        //stop, greet and offer new game
 
-    private boolean isSolved() {
+//        AlertDialog.Builder alertDialogBuilder =
+//                new AlertDialog.Builder
+//                (new ContextThemeWrapper(this, R.style.AlertDialogCustom));
 
-        if (arrayOfSixteen[15] != 0) // if blank tile is not in the solved position ==> not solved
-            return false;
+        AlertDialog.Builder alertDialogBuilder =
+                new AlertDialog.Builder(this, R.style.AlertDialogCustom);
 
-        for (int i = arrayOfSixteen.length - 1; i >= 0; i--) {
-            if (arrayOfSixteen[i] != i + 1)
-                return false;
+        alertDialogBuilder.setMessage(message);
+        alertDialogBuilder.setCancelable(false);
+        alertDialogBuilder.setPositiveButton("Play",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        shuffle();
+                    }
+                });
+        alertDialogBuilder.setNegativeButton("Quit",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                });
+
+
+        AlertDialog alert = alertDialogBuilder.create();
+//        alert.setTitle("Victory tittle!");
+        alert.show();
+    }
+
+    private boolean isSolved()
+    {
+        boolean solved = true;
+
+        if (arrayOfSixteen[15] != 0)
+        {
+            solved = false;
         }
 
+        for (int i = 0; i < arrayOfSixteen.length - 1; i++)
+        {
+            if(arrayOfSixteen[i] != i + 1)
+            {
+                solved = false;
+            }
+        }
 
-        return true;
+        return solved;
     }
 
 }
